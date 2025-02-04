@@ -26,6 +26,7 @@ const levelInfo = [
   },
 ];
 
+// Maze layout where 1 = path, 0 = blocked path, "qX" = quest, "F" = finish
 const mazeLayout = [
   [1, 0, "q3", 1, 1, 0, "q4", 1, "F"],
   [1, 0, 0, 0, 1, 0, 0, 1, 0],
@@ -51,6 +52,7 @@ const MazeGame = () => {
     const { x, y } = playerPosition;
     let newX = x,
       newY = y;
+
     if (event.key === "ArrowRight" && x + 1 < mazeLayout[0].length) newX += 1;
     if (event.key === "ArrowLeft" && x - 1 >= 0) newX -= 1;
     if (event.key === "ArrowDown" && y + 1 < mazeLayout.length) newY += 1;
@@ -64,7 +66,10 @@ const MazeGame = () => {
   };
 
   const canMove = (x, y) => {
-    return mazeLayout[y] && mazeLayout[y][x] !== 0;
+    return (
+      mazeLayout[y] &&
+      (mazeLayout[y][x] === 1 || typeof mazeLayout[y][x] === "string")
+    );
   };
 
   const checkForCollectibles = (x, y) => {
@@ -105,34 +110,41 @@ const MazeGame = () => {
       <h1 className="text-2xl font-bold mb-4">Maze Learning Game</h1>
       <div className="relative grid grid-cols-9 gap-1 p-4 bg-gray-800 rounded-lg shadow-lg">
         {mazeLayout.map((row, y) =>
-          row.map((cell, x) => (
-            <div
-              key={`${x}-${y}`}
-              className={`w-12 h-12 flex items-center justify-center border ${
-                cell === 1 ? "bg-gray-700" : "bg-gray-500"
-              }`}
-            >
-              {questKeys.includes(cell) &&
-                !collectibles[questKeys.indexOf(cell)].collected && (
-                  <motion.div
-                    className="w-6 h-6 bg-yellow-400 rounded-full"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                  />
+          row.map((cell, x) => {
+            const isPlayer = playerPosition.x === x && playerPosition.y === y;
+            const isPath = cell === 1;
+            const isBlocked = cell === 0;
+            const isQuest = questKeys.includes(cell);
+            const isFinish = cell === "F";
+
+            return (
+              <div
+                key={`${x}-${y}`}
+                className={`w-12 h-12 flex items-center justify-center border ${
+                  isPlayer
+                    ? "bg-white" // Player position
+                    : isPath
+                    ? "bg-green-500" // Path
+                    : isBlocked
+                    ? "bg-gray-700" // Blocked path
+                    : "bg-green-500" // Quest or Finish
+                }`}
+              >
+                {isQuest &&
+                  !collectibles[questKeys.indexOf(cell)]?.collected && (
+                    <motion.div
+                      className="w-6 h-6 bg-yellow-400 rounded-full"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 1 }}
+                    />
+                  )}
+                {isFinish && (
+                  <div className="w-6 h-6 bg-red-500 rounded-full" />
                 )}
-              {cell === "F" && (
-                <div className="w-6 h-6 bg-red-500 rounded-full" />
-              )}
-            </div>
-          ))
+              </div>
+            );
+          })
         )}
-        <div
-          className="w-12 h-12 bg-blue-500 absolute"
-          style={{
-            left: playerPosition.x * 50 + 6,
-            top: playerPosition.y * 50 + 6,
-          }}
-        />
       </div>
       <div className="mt-4 text-lg">
         Quests Collected: {profile.questsCollected} / {questKeys.length}
