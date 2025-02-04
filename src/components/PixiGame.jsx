@@ -3,20 +3,21 @@ import { motion } from "framer-motion";
 
 const levelInfo = [
   {
-    title: "What is JSX?",
-    description: "JSX allows you to write HTML-like syntax in JavaScript.",
+    title: "What is HTML?",
+    description: "HTML is the standard markup language for creating web pages.",
   },
   {
-    title: "What is State?",
-    description: "State is used to manage dynamic data in React components.",
+    title: "What is CSS?",
+    description: "CSS is used to style and layout web pages.",
   },
   {
-    title: "What are Props?",
-    description: "Props are arguments passed into React components.",
+    title: "What is JavaScript?",
+    description:
+      "JavaScript is a programming language that enables interactive web pages.",
   },
   {
-    title: "What is Virtual DOM?",
-    description: "The Virtual DOM is a lightweight copy of the actual DOM.",
+    title: "What is React?",
+    description: "React is a JavaScript library for building user interfaces.",
   },
 ];
 
