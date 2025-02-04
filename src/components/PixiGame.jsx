@@ -1,23 +1,26 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const levelInfo = [
   {
-    title: "What is HTML?",
-    description: "HTML is the standard markup language for creating web pages.",
-  },
-  {
-    title: "What is CSS?",
-    description: "CSS is used to style and layout web pages.",
-  },
-  {
-    title: "What is JavaScript?",
+    title: "Challenge 1",
     description:
-      "JavaScript is a programming language that enables interactive web pages.",
+      "HyperText Markup Language is the standard markup language for creating web pages.",
+    challenge: "H_ML",
+    answer: "T", // Correct letter to fill in
   },
   {
-    title: "What is React?",
-    description: "React is a JavaScript library for building user interfaces.",
+    title: "Challenge 2",
+    description: "Cascading Style Sheet is used to style and layout web pages.",
+    challenge: "_SS",
+    answer: "C", // Correct letter to fill in
+  },
+  {
+    title: "Challenge 3",
+    description:
+      "It is a programming language that enables interactive web pages.",
+    challenge: "____Script",
+    answer: "Java", // Correct letter to fill in
   },
 ];
 
@@ -50,6 +53,7 @@ const MazeGame = () => {
   const [info, setInfo] = useState({ title: "", description: "" });
   const [dialogVisible, setDialogVisible] = useState(false);
   const [profile, setProfile] = useState({ questsCollected: 0 });
+  const [currentChallenge, setCurrentChallenge] = useState(null);
 
   // Reset the game state
   const restartGame = () => {
@@ -60,17 +64,20 @@ const MazeGame = () => {
     setProfile({ questsCollected: 0 });
     setInfo({ title: "", description: "" });
     setDialogVisible(false);
+    setCurrentChallenge(null);
   };
 
-  const handleKeyDown = (event) => {
+  const movePlayer = (direction) => {
+    if (currentChallenge !== null) return; // Prevent movement while answering a challenge
+
     const { x, y } = playerPosition;
     let newX = x,
       newY = y;
 
-    if (event.key === "ArrowRight" && x + 1 < mazeLayout[0].length) newX += 1;
-    if (event.key === "ArrowLeft" && x - 1 >= 0) newX -= 1;
-    if (event.key === "ArrowDown" && y + 1 < mazeLayout.length) newY += 1;
-    if (event.key === "ArrowUp" && y - 1 >= 0) newY -= 1;
+    if (direction === "ArrowRight" && x + 1 < mazeLayout[0].length) newX += 1;
+    if (direction === "ArrowLeft" && x - 1 >= 0) newX -= 1;
+    if (direction === "ArrowDown" && y + 1 < mazeLayout.length) newY += 1;
+    if (direction === "ArrowUp" && y - 1 >= 0) newY -= 1;
 
     if (canMove(newX, newY)) {
       setPlayerPosition({ x: newX, y: newY });
@@ -89,9 +96,12 @@ const MazeGame = () => {
   const checkForCollectibles = (x, y) => {
     const questIndex = questKeys.indexOf(mazeLayout[y][x]);
     if (questIndex !== -1) {
+      // Ignore already collected quests
+      if (collectibles[questIndex].collected) return;
+
       // Only allow collecting the next quest in the sequence
       if (questIndex === profile.questsCollected) {
-        collectConcept(questIndex);
+        setCurrentChallenge(questIndex); // Show the challenge dialog
       } else {
         alert("You must collect the quests in order!");
       }
@@ -107,33 +117,50 @@ const MazeGame = () => {
     }
   };
 
-  const collectConcept = (index) => {
-    setInfo(collectibles[index]);
-    setDialogVisible(true);
-    setCollectibles((prev) =>
-      prev.map((c, i) => (i === index ? { ...c, collected: true } : c))
-    );
-    setProfile((prev) => ({
-      ...prev,
-      questsCollected: prev.questsCollected + 1,
-    }));
+  const collectConcept = (index, userAnswer) => {
+    const correctAnswer = levelInfo[index].answer.toUpperCase();
+    if (userAnswer.trim().toUpperCase() === correctAnswer) {
+      setInfo(collectibles[index]);
+      setDialogVisible(true);
+      setCollectibles((prev) =>
+        prev.map((c, i) => (i === index ? { ...c, collected: true } : c))
+      );
+      setProfile((prev) => ({
+        ...prev,
+        questsCollected: prev.questsCollected + 1,
+      }));
+      setCurrentChallenge(null); // Reset the challenge state to allow movement
+    } else {
+      alert("Incorrect answer! Try again.");
+    }
   };
 
   useEffect(() => {
+    const handleKeyDown = (event) => {
+      movePlayer(event.key);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [playerPosition]);
+  }, [playerPosition, currentChallenge]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-      <h1 className="text-2xl font-bold mb-4">Maze Web Developer Roadmap</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+      <h1 className="text-xl md:text-2xl font-bold mb-4 text-center">
+        Maze Web Developer Roadmap
+      </h1>
       <button
         onClick={restartGame}
         className="mb-4 px-4 py-2 bg-blue-500 rounded"
       >
         Restart Game
       </button>
-      <div className="relative grid grid-cols-15 gap-1 p-4 bg-gray-800 rounded-lg shadow-lg">
+      <div
+        className="relative grid gap-1 p-4 bg-gray-800 rounded-lg shadow-lg"
+        style={{
+          gridTemplateColumns: `repeat(${mazeLayout[0].length}, minmax(20px, 1fr))`,
+        }}
+      >
         {mazeLayout.map((row, y) =>
           row.map((cell, x) => {
             const isPlayer = playerPosition.x === x && playerPosition.y === y;
@@ -145,7 +172,7 @@ const MazeGame = () => {
             return (
               <div
                 key={`${x}-${y}`}
-                className={`w-8 h-8 flex items-center justify-center border ${
+                className={`flex items-center justify-center border ${
                   isPlayer
                     ? "bg-blue-500" // Player position
                     : isPath
@@ -154,6 +181,11 @@ const MazeGame = () => {
                     ? "bg-gray-700" // Blocked path
                     : "bg-yellow-500" // Quest or Finish
                 }`}
+                style={{
+                  aspectRatio: "1 / 1", // Ensure square cells
+                  minWidth: "20px", // Minimum size for small screens
+                  minHeight: "20px",
+                }}
               >
                 {isQuest &&
                   !collectibles[questKeys.indexOf(cell)]?.collected && (
@@ -175,9 +207,35 @@ const MazeGame = () => {
           })
         )}
       </div>
-      <div className="mt-4 text-lg">
+      <div className="mt-4 text-lg text-center">
         Quests Collected: {profile.questsCollected} / {questKeys.length}
       </div>
+
+      {/* Dialog for Challenges */}
+      {currentChallenge !== null && (
+        <div className="absolute top-20 bg-black bg-opacity-80 p-4 rounded-lg text-center">
+          <h2 className="text-xl font-bold">
+            {levelInfo[currentChallenge].title}
+          </h2>
+          <p className="mt-2">{levelInfo[currentChallenge].description}</p>
+          <p className="mt-4 font-semibold">
+            {levelInfo[currentChallenge].challenge}
+          </p>
+          <input
+            type="text"
+            maxLength={1} // Restrict input to a single character
+            className="mt-2 px-2 py-1 rounded border border-gray-300 bg-gray-700 text-white w-12 text-center"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                collectConcept(currentChallenge, e.target.value);
+              }
+            }}
+            autoFocus
+          />
+        </div>
+      )}
+
+      {/* Dialog for Information */}
       {dialogVisible && (
         <div className="absolute top-20 bg-black bg-opacity-80 p-4 rounded-lg text-center">
           <h2 className="text-xl font-bold">{info.title}</h2>
@@ -190,6 +248,38 @@ const MazeGame = () => {
           </button>
         </div>
       )}
+
+      {/* Virtual Keypad for Mobile */}
+      <div className=" bottom-4 left-0 right-0 flex flex-col items-center space-y-2">
+        <div className="flex space-x-2">
+          <button
+            onClick={() => movePlayer("ArrowUp")}
+            className="px-4 py-2 bg-blue-500 rounded"
+          >
+            ↑
+          </button>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => movePlayer("ArrowLeft")}
+            className="px-4 py-2 bg-blue-500 rounded"
+          >
+            ←
+          </button>
+          <button
+            onClick={() => movePlayer("ArrowDown")}
+            className="px-4 py-2 bg-blue-500 rounded"
+          >
+            ↓
+          </button>
+          <button
+            onClick={() => movePlayer("ArrowRight")}
+            className="px-4 py-2 bg-blue-500 rounded"
+          >
+            →
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
