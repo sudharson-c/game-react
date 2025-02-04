@@ -7,20 +7,20 @@ const levelInfo = [
     description:
       "HyperText Markup Language is the standard markup language for creating web pages.",
     challenge: "H_ML",
-    answer: "T", // Correct letter to fill in
+    answer: "T",
   },
   {
     title: "Challenge 2",
     description: "Cascading Style Sheet is used to style and layout web pages.",
     challenge: "_SS",
-    answer: "C", // Correct letter to fill in
+    answer: "C",
   },
   {
     title: "Challenge 3",
     description:
       "It is a programming language that enables interactive web pages.",
-    challenge: "____Script",
-    answer: "Java", // Correct letter to fill in
+    challenge: "JavaScript",
+    answer: "S",
   },
 ];
 
@@ -55,7 +55,6 @@ const MazeGame = () => {
   const [profile, setProfile] = useState({ questsCollected: 0 });
   const [currentChallenge, setCurrentChallenge] = useState(null);
 
-  // Reset the game state
   const restartGame = () => {
     setPlayerPosition({ x: 0, y: 0 });
     setCollectibles(
@@ -68,7 +67,7 @@ const MazeGame = () => {
   };
 
   const movePlayer = (direction) => {
-    if (currentChallenge !== null) return; // Prevent movement while answering a challenge
+    if (currentChallenge !== null) return;
 
     const { x, y } = playerPosition;
     let newX = x,
@@ -96,12 +95,10 @@ const MazeGame = () => {
   const checkForCollectibles = (x, y) => {
     const questIndex = questKeys.indexOf(mazeLayout[y][x]);
     if (questIndex !== -1) {
-      // Ignore already collected quests
       if (collectibles[questIndex].collected) return;
 
-      // Only allow collecting the next quest in the sequence
       if (questIndex === profile.questsCollected) {
-        setCurrentChallenge(questIndex); // Show the challenge dialog
+        setCurrentChallenge(questIndex);
       } else {
         alert("You must collect the quests in order!");
       }
@@ -113,7 +110,7 @@ const MazeGame = () => {
       mazeLayout[y][x] === "F" &&
       profile.questsCollected === questKeys.length
     ) {
-      alert("Congratulations! You've completed the maze!");
+      alert("Vilayandathu pothum, screen paarunga frands😁 ");
     }
   };
 
@@ -129,7 +126,7 @@ const MazeGame = () => {
         ...prev,
         questsCollected: prev.questsCollected + 1,
       }));
-      setCurrentChallenge(null); // Reset the challenge state to allow movement
+      setCurrentChallenge(null);
     } else {
       alert("Incorrect answer! Try again.");
     }
