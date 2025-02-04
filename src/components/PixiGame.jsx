@@ -3,38 +3,40 @@ import { motion } from "framer-motion";
 
 const levelInfo = [
   {
-    title: "What is HTML?",
-    description: "HTML is the standard markup language for creating web pages.",
+    title: "What is JSX?",
+    description: "JSX allows you to write HTML-like syntax in JavaScript.",
   },
   {
-    title: "What is CSS?",
-    description: "CSS is used to style and layout web pages.",
+    title: "What is State?",
+    description: "State is used to manage dynamic data in React components.",
   },
   {
-    title: "What is JavaScript?",
-    description:
-      "JavaScript is a programming language that enables interactive web pages.",
+    title: "What are Props?",
+    description: "Props are arguments passed into React components.",
   },
   {
-    title: "What is React?",
-    description: "React is a JavaScript library for building user interfaces.",
-  },
-  {
-    title: "What is Node.js?",
-    description:
-      "Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine.",
+    title: "What is Virtual DOM?",
+    description: "The Virtual DOM is a lightweight copy of the actual DOM.",
   },
 ];
 
-// Maze layout where 1 = path, 0 = blocked path, "qX" = quest, "F" = finish
+// Complex maze layout where 1 = path, 0 = blocked path, "qX" = quest, "F" = finish
 const mazeLayout = [
-  [1, 0, "q3", 1, 1, 0, "q4", 1, "F"],
-  [1, 0, 0, 0, 1, 0, 0, 1, 0],
-  [1, 0, 0, 1, 1, 1, 0, 1, 1],
-  [1, 1, 1, 1, 0, 1, 1, 0, 1],
-  [1, 0, 0, 1, 0, 0, 1, 0, 1],
-  [1, 0, 0, 1, "q2", 0, 1, 0, 1],
-  [1, "q1", 0, 0, 0, 0, 1, 1, 1],
+  [1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, "F"],
+  [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1],
+  [0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+  [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+  [1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+  [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1],
+  [0, 0, 1, 0, 1, 1, 1, "q2", 1, 1, 1, 0, 0, 0, 1],
+  [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1],
+  [1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0],
+  [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0],
+  [1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+  [1, "q1", 0, 0, 1, 0, 0, 0, 1, 1, "q3", 0, 1, 1, "q4"],
 ];
 
 const questKeys = ["q1", "q2", "q3", "q4"];
@@ -47,6 +49,17 @@ const MazeGame = () => {
   const [info, setInfo] = useState({ title: "", description: "" });
   const [dialogVisible, setDialogVisible] = useState(false);
   const [profile, setProfile] = useState({ questsCollected: 0 });
+
+  // Reset the game state
+  const restartGame = () => {
+    setPlayerPosition({ x: 0, y: 0 });
+    setCollectibles(
+      levelInfo.map((_, index) => ({ ..._, collected: false, index }))
+    );
+    setProfile({ questsCollected: 0 });
+    setInfo({ title: "", description: "" });
+    setDialogVisible(false);
+  };
 
   const handleKeyDown = (event) => {
     const { x, y } = playerPosition;
@@ -74,8 +87,13 @@ const MazeGame = () => {
 
   const checkForCollectibles = (x, y) => {
     const questIndex = questKeys.indexOf(mazeLayout[y][x]);
-    if (questIndex !== -1 && !collectibles[questIndex].collected) {
-      collectConcept(questIndex);
+    if (questIndex !== -1) {
+      // Only allow collecting the next quest in the sequence
+      if (questIndex === profile.questsCollected) {
+        collectConcept(questIndex);
+      } else {
+        alert("You must collect the quests in order!");
+      }
     }
   };
 
@@ -107,8 +125,14 @@ const MazeGame = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-      <h1 className="text-2xl font-bold mb-4">Maze Learning Game</h1>
-      <div className="relative grid grid-cols-9 gap-1 p-4 bg-gray-800 rounded-lg shadow-lg">
+      <h1 className="text-2xl font-bold mb-4">Maze Web Developer Roadmap</h1>
+      <button
+        onClick={restartGame}
+        className="mb-4 px-4 py-2 bg-blue-500 rounded"
+      >
+        Restart Game
+      </button>
+      <div className="relative grid grid-cols-15 gap-1 p-4 bg-gray-800 rounded-lg shadow-lg">
         {mazeLayout.map((row, y) =>
           row.map((cell, x) => {
             const isPlayer = playerPosition.x === x && playerPosition.y === y;
@@ -120,26 +144,30 @@ const MazeGame = () => {
             return (
               <div
                 key={`${x}-${y}`}
-                className={`w-12 h-12 flex items-center justify-center border ${
+                className={`w-8 h-8 flex items-center justify-center border ${
                   isPlayer
-                    ? "bg-white" // Player position
+                    ? "bg-blue-500" // Player position
                     : isPath
                     ? "bg-green-500" // Path
                     : isBlocked
                     ? "bg-gray-700" // Blocked path
-                    : "bg-green-500" // Quest or Finish
+                    : "bg-yellow-500" // Quest or Finish
                 }`}
               >
                 {isQuest &&
                   !collectibles[questKeys.indexOf(cell)]?.collected && (
                     <motion.div
-                      className="w-6 h-6 bg-yellow-400 rounded-full"
+                      className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center"
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ repeat: Infinity, duration: 1 }}
-                    />
+                    >
+                      <p className="text-black text-xs">
+                        {questKeys.indexOf(cell) + 1}
+                      </p>
+                    </motion.div>
                   )}
                 {isFinish && (
-                  <div className="w-6 h-6 bg-red-500 rounded-full" />
+                  <div className="w-4 h-4 bg-red-500 rounded-full" />
                 )}
               </div>
             );
