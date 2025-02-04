@@ -19,12 +19,17 @@ const levelInfo = [
     title: "Challenge 3",
     description:
       "It is a programming language that enables interactive web pages.",
-    challenge: "JavaScript",
+    challenge: "Java_cript",
     answer: "S",
+  },
+  {
+    title: "Challenge 4",
+    description: "An UI Library used to build best Frontends",
+    challenge: "_eactJS",
+    answer: "R",
   },
 ];
 
-// Complex maze layout where 1 = path, 0 = blocked path, "qX" = quest, "F" = finish
 const mazeLayout = [
   [1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, "F"],
   [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1],
